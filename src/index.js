@@ -7,24 +7,36 @@ class App extends React.Component {
     super(props);
 
     this.state = {
-      lat: null
-
+      lat: null,
+      errorMessage: ''
     };
-  }
 
+    window.navigator.geolocation.getCurrentPosition(
+      (position) => {
+        // we called setstate!!!
+        this.setState({ lat: position.coords.latitude })
+
+        // DO NOT DO THIS!!!
+        // this.state.lat = position.coords.latitude
+        // The only exception to this is when we initialize our constructor function
+      },
+      (err) => {
+        this.setState({
+          errorMessage: err.message
+        })
+      }
+    );
+  }
 
   // React says we have to define render!! This is a requiremement in every React component
   render () {
-    window.navigator.geolocation.getCurrentPosition(
-      (position) => console.log(position),
-      // This callback above is referred to as the 'success callback' as it gets called every time everything goes as planned
-      (err) => console.log(err)
-      // This is the error callback if something breaks
-    );
-
-    return (
-      <div> Latitude: </div>
-    )
+    if (this.state.errorMessage && !this.state.lat) {
+      return <div> Error: {this.state.errorMessage} </div>;
+    }
+    if (!this.state.errorMessage && this.state.lat) {
+      return <div> Latitude: {this.state.lat} </div>;
+    }
+    return <div> Loading! </div>
   }
 }
 
